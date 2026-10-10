@@ -1,0 +1,11 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# กันพลาด: ห้ามเอาคีย์หรือ env เข้า repo
+.env
+.env.*
+*.key
+secrets.*

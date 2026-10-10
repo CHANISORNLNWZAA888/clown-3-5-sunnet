@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clown 3.5 Sonnet</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Prompt:wght@300;400;500;600;700&family=Mali:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="claude-theme">
+
+  <!-- ================= MAIN CLAUDE APP LAYOUT ================= -->
+  <div class="app-layout">
+    
+    <!-- Left Sidebar (Claude minimal style) -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-top">
+        <div class="brand-row">
+          <div class="claude-logo">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L13.8 8.6L20.4 7L16 12L20.4 17L13.8 15.4L12 22L10.2 15.4L3.6 17L8 12L3.6 7L10.2 8.6L12 2Z"/>
+            </svg>
+          </div>
+          <span class="brand-name">Clown 3.5 Sonnet</span>
+        </div>
+        <button class="new-chat-btn" onclick="startNewChat()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          <span>Start new chat</span>
+        </button>
+      </div>
+
+      <div class="history-section">
+        <div class="history-label">Recent Chats</div>
+        <div class="history-item active">💬 สนทนาปัจจุบัน</div>
+      </div>
+
+      <div class="sidebar-bottom">
+        <button class="api-key-btn" onclick="openApiKeyModal()">
+         <span>🔑 ตั้งค่า Gemini API Key</span>
+        </button>
+        <div class="user-profile-bar">
+          <div class="user-avatar">P</div>
+          <div class="user-info">
+            <span class="user-name">Poorman Plan</span>
+            <span class="user-tier">Token หมดไวพิเศษ</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Chat Workspace -->
+    <main class="chat-workspace">
+      
+      <!-- Top Navigation Bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="model-dropdown" onclick="openApiKeyModal()">
+            <span class="model-name">Clown 3.5 Sonnet</span>
+            <span class="model-badge" id="modelStatusBadge">Checking API...</span>
+            <svg class="dropdown-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Live Token Meter -->
+          <div class="token-container">
+            <div class="token-meta">
+              <span class="token-label">Remaining Tokens:</span>
+              <span class="token-value" id="tokenValue">50</span>
+              <span class="token-max">/ 50</span>
+            </div>
+            <div class="token-track">
+              <div class="token-fill" id="tokenFill" style="width: 100%;"></div>
+            </div>
+          </div>
+
+          <button class="pawnshop-shortcut-btn" onclick="togglePawnshop(true)">
+            🏪 โรงรับจำนำ
+          </button>
+        </div>
+      </header>
+
+      <!-- Chat Stream Flow -->
+      <section class="messages-viewport" id="messagesViewport">
+        <!-- Claude Welcome Hero -->
+        <div class="welcome-hero" id="welcomeHero">
+          <div class="hero-logo">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L13.8 8.6L20.4 7L16 12L20.4 17L13.8 15.4L12 22L10.2 15.4L3.6 17L8 12L3.6 7L10.2 8.6L12 2Z"/>
+            </svg>
+          </div>
+          <h1 class="hero-title">สวัสดี, มีอะไรให้ช่วยคิดแทน<br>ในวันที่สมองล้าไหม?</h1>
+          <p class="hero-desc">โมเดลภาษาที่ดูเหมือนฉลาดทุกอย่าง จนกระทั่งคุณใช้ Token ฟรีหมด</p>
+
+          <div class="starter-cards">
+            <div class="card" onclick="sendStarterPrompt('ช่วยอธิบายสถาปัตยกรรม Microservices แบบกระชับและเห็นภาพชัดเจน')">
+              <div class="card-icon">⚡</div>
+              <div class="card-text">อธิบายสถาปัตยกรรม Microservices แบบกระชับ</div>
+            </div>
+            <div class="card" onclick="sendStarterPrompt('เขียนโค้ดแก้ปัญหา Two Sum ในภาษา C แบบประหยัดหน่วยความจำ')">
+              <div class="card-icon">💻</div>
+              <div class="card-text">แก้โจทย์ Two Sum ในภาษา C แบบ High Performance</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-thread" id="chatThread"></div>
+      </section>
+
+      <!-- Bottom Input Container -->
+      <footer class="input-section">
+        <div class="input-card">
+          <textarea id="promptInput" placeholder="พิมพ์ข้อความคุยกับ Clown 3.5... (กด Enter เพื่อส่ง)" rows="1"></textarea>
+          <button id="sendBtn" class="send-btn" onclick="handleSubmit()">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+          </button>
+        </div>
+        <div class="input-footnote">
+          Clown 3.5 Sonnet may hallucinate or run out of tokens abruptly. (แอบกดปุ่ม <code>*</code> เพื่อปลดล็อกโหมดลับ)
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- ================= TOKEN PAWNSHOP MODAL ================= -->
+  <div class="modal-backdrop hidden" id="pawnshopModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3>🏪 โรงรับจำนำ Token สิ้นหวัง</h3>
+          <p>แลกศักดิ์ศรีและความอดทนของคุณเพื่อต่ออายุการอ่าน</p>
+        </div>
+        <button class="modal-close-btn" onclick="togglePawnshop(false)">✕</button>
+      </div>
+
+      <div class="pawnshop-tabs">
+        <button class="tab-btn active" id="tabStillnessBtn" onclick="switchPawnTab('stillness')">1. สงบนิ่ง 5 วิ</button>
+        <button class="tab-btn" id="tabSincerityBtn" onclick="switchPawnTab('sincerity')">2. สารภาพบาป</button>
+        <button class="tab-btn" id="tabDodgingBtn" onclick="switchPawnTab('dodging')">3. รับฟรี 50T</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Game 1: Stillness -->
+        <div class="game-view" id="gameStillness">
+          <div class="notice-box warning">
+            ⚠️ <b>กติกา:</b> กดเริ่ม แล้ว<b>ห้ามขยับเมาส์แม้แต่มิลลิเมตรเดียว</b> 5 วินาที เพื่อไว้อาลัยให้ GPU
+          </div>
+          <div class="timer-big" id="stillnessTimerDisplay">5.00</div>
+          <p class="game-status" id="stillnessStatus">พร้อมแล้วกดปุ่มด้านล่างเพื่อเริ่มทำสมาธิ</p>
+          <button class="game-action-btn" id="startStillnessBtn" onclick="startStillnessChallenge()">🧘 เริ่มสงบนิ่ง (5 วินาที)</button>
+        </div>
+
+        <!-- Game 2: Sincerity -->
+        <div class="game-view hidden" id="gameSincerity">
+          <div class="notice-box danger">
+            ⛔ <b>กติกา:</b> พิมพ์ข้อความด้านล่างให้ถูกต้อง <b>ห้ามกด Backspace หรือ Delete เด็ดขาด</b> ถ้ากดลบ ระบบจะล้างทิ้งทันที!
+          </div>
+          <div class="target-sincerity-text">ข้าพเจ้าขอสารภาพว่าคิดเองไม่เป็นและเป็นภาระต่อเซิร์ฟเวอร์</div>
+          <textarea id="sincerityInput" placeholder="เริ่มพิมพ์ที่นี่... (ห้ามกดลบนะ)" rows="2"></textarea>
+          <div class="sincerity-counter" id="sincerityCounter">ความคืบหน้า: 0 / ? ตัวอักษร</div>
+        </div>
+
+        <!-- Game 3: Dodging -->
+        <div class="game-view hidden" id="gameDodging">
+          <div class="notice-box success">
+            🎁 <b>แจกฟรี:</b> โปรโมชั่นพิเศษฉลองเปิดตัว! คลิกปุ่มด้านล่างเพื่อรับ 50 Token ทันที
+          </div>
+          <p class="game-status">พยายามคลิกให้โดนสิ... ง่ายนิดเดียว!</p>
+          <div class="dodge-playground">
+            <button id="dodgingBtn" onmouseenter="dodgeButton(this)">⚡ รับ 50 Token ฟรีคลิกตรงนี้!</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 💖 SECRET SENPAI CRINGE MODAL ================= -->
+  <div class="senpai-backdrop hidden" id="senpaiModal">
+    <div class="speedlines"></div>
+    <div class="sparkles-container" id="sparklesContainer"></div>
+
+    <div class="senpai-window">
+      <div class="senpai-header">
+        <div class="senpai-brand">
+          <span class="senpai-emoji">👧</span>
+          <div>
+            <h4>Clown-chan (Senpai Mode) ♡</h4>
+            <span class="senpai-status">● กำลังจ้องมองเซนไป่อย่างไม่ละสายตา (Cringe Engine)</span>
+          </div>
+        </div>
+        <div class="senpai-header-actions">
+          <button type="button" class="senpai-sound-btn" id="senpaiSoundBtn" onclick="toggleSenpaiSound()">🔊 เสียง: เปิด</button>
+          <span class="senpai-tag">✨ SECRET SENPAI UNLOCKED ✨</span>
+          <button class="senpai-close-btn" onclick="toggleSenpai(false)">✕ กลับสู่โลกปกติ</button>
+        </div>
+      </div>
+
+      <div class="senpai-layout">
+        <!-- Anime Portrait & Stats -->
+        <aside class="senpai-aside">
+          <div class="anime-frame">
+            <svg class="anime-svg" id="animeSvg" viewBox="0 0 240 280" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="irisGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#7B61FF"/>
+                  <stop offset="1" stop-color="#FF7EB6"/>
+                </linearGradient>
+                <linearGradient id="hairGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#FF9DBF"/>
+                  <stop offset="1" stop-color="#FF7AA8"/>
+                </linearGradient>
+                <g id="cBow">
+                  <path d="M0,0 L-15,-10 Q-19,0 -15,10 Z" fill="#FF3D7F"/>
+                  <path d="M0,0 L15,-10 Q19,0 15,10 Z" fill="#FF3D7F"/>
+                  <circle r="5" fill="#FF6B9D" stroke="#fff" stroke-width="1.5"/>
+                </g>
+                <path id="cHeart" d="M0,-3 C-4,-10 -13,-3 0,8 C13,-3 4,-10 0,-3 Z"/>
+              </defs>
+
+              <!-- twin tails -->
+              <path d="M52,100 C8,112 0,196 28,254 C52,224 66,176 70,126 Z" fill="url(#hairGrad)"/>
+              <path d="M188,100 C232,112 240,196 212,254 C188,224 174,176 170,126 Z" fill="url(#hairGrad)"/>
+              <path d="M22,200 Q30,226 28,248" stroke="#FFD3E2" stroke-width="4" fill="none" stroke-linecap="round" opacity=".7"/>
+              <path d="M218,200 Q210,226 212,248" stroke="#FFD3E2" stroke-width="4" fill="none" stroke-linecap="round" opacity=".7"/>
+
+              <!-- hair back + cat ears -->
+              <ellipse cx="120" cy="124" rx="82" ry="84" fill="url(#hairGrad)"/>
+              <path d="M58,96 L52,34 L102,62 Z" fill="#FF8DB5"/>
+              <path d="M66,86 L62,50 L92,67 Z" fill="#FFD1E0"/>
+              <path d="M182,96 L188,34 L138,62 Z" fill="#FF8DB5"/>
+              <path d="M174,86 L178,50 L148,67 Z" fill="#FFD1E0"/>
+
+              <!-- body: sailor uniform -->
+              <rect x="108" y="196" width="24" height="44" fill="#FFDCCB"/>
+              <path d="M62,280 C64,246 90,230 120,230 C150,230 176,246 178,280 Z" fill="#fff" stroke="#FFC2D6" stroke-width="2"/>
+              <path d="M90,236 L120,266 L150,236 L162,250 L120,280 L78,250 Z" fill="#7C9DFF"/>
+              <path d="M104,246 L120,266 L136,246" stroke="#fff" stroke-width="2.5" fill="none"/>
+              <use href="#cBow" transform="translate(120 264) scale(.8)"/>
+
+              <!-- face -->
+              <ellipse cx="120" cy="142" rx="66" ry="62" fill="#FFE9DD"/>
+
+              <!-- blush -->
+              <ellipse class="blush" cx="68" cy="172" rx="13" ry="7" fill="#FF8FA3" opacity=".55"/>
+              <ellipse class="blush" cx="172" cy="172" rx="13" ry="7" fill="#FF8FA3" opacity=".55"/>
+
+              <!-- eyes -->
+              <g class="eye">
+                <ellipse cx="92" cy="148" rx="15" ry="19" fill="#fff"/>
+                <ellipse cx="92" cy="150" rx="12" ry="16" fill="url(#irisGrad)"/>
+                <ellipse cx="92" cy="152" rx="6" ry="9" fill="#3B1237"/>
+                <circle cx="87" cy="143" r="5" fill="#fff"/>
+                <circle cx="98" cy="157" r="2.6" fill="#fff"/>
+                <path d="M75,138 Q92,124 109,138" stroke="#3B1237" stroke-width="3.6" fill="none" stroke-linecap="round"/>
+              </g>
+              <g class="eye">
+                <ellipse cx="148" cy="148" rx="15" ry="19" fill="#fff"/>
+                <ellipse cx="148" cy="150" rx="12" ry="16" fill="url(#irisGrad)"/>
+                <ellipse cx="148" cy="152" rx="6" ry="9" fill="#3B1237"/>
+                <circle cx="143" cy="143" r="5" fill="#fff"/>
+                <circle cx="154" cy="157" r="2.6" fill="#fff"/>
+                <path d="M131,138 Q148,124 165,138" stroke="#3B1237" stroke-width="3.6" fill="none" stroke-linecap="round"/>
+              </g>
+
+              <!-- mouth (ω) -->
+              <path class="mouth" d="M110,182 Q115,190 120,182 Q125,190 130,182" stroke="#B5385A" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+
+              <!-- bangs, side locks, ahoge -->
+              <path d="M52,138 C44,70 88,44 120,44 C152,44 196,70 188,138 C180,112 170,98 160,92 C152,106 138,114 126,112 L120,100 L114,112 C102,114 88,106 80,92 C70,98 60,112 52,138 Z" fill="url(#hairGrad)"/>
+              <path d="M52,138 C48,166 54,188 66,200 C66,176 70,152 74,128 Z" fill="url(#hairGrad)"/>
+              <path d="M188,138 C192,166 186,188 174,200 C174,176 170,152 166,128 Z" fill="url(#hairGrad)"/>
+              <path d="M84,62 Q120,42 156,62" stroke="#FFD3E2" stroke-width="5" fill="none" stroke-linecap="round" opacity=".75"/>
+              <path d="M120,46 C108,20 134,8 144,22" stroke="#FF8DB5" stroke-width="5" fill="none" stroke-linecap="round"/>
+              <polygon points="158,58 161,66 170,66 163,71 166,80 158,74 150,80 153,71 146,66 155,66" fill="#FFD166" stroke="#fff" stroke-width="1"/>
+
+              <!-- hair ties -->
+              <use href="#cBow" transform="translate(50 106) rotate(-18)"/>
+              <use href="#cBow" transform="translate(190 106) rotate(18)"/>
+
+              <!-- floating hearts -->
+              <g transform="translate(24 70) scale(.9)"><use href="#cHeart" class="fh fh1" fill="#FF3D7F"/></g>
+              <g transform="translate(214 58) scale(.7)"><use href="#cHeart" class="fh fh2" fill="#FF6B9D"/></g>
+              <g transform="translate(206 226) scale(.8)"><use href="#cHeart" class="fh fh3" fill="#FF3D7F"/></g>
+            </svg>
+            <div class="senpai-mood" id="senpaiMood">😳 Mood: เขินจนตัวสั่น</div>
+          </div>
+          <div class="cringe-score-card">
+            <div class="score-title">ระดับความ Cringe</div>
+            <div class="hearts-row" id="heartsRow">🖤 🖤 🖤 🖤 🖤</div>
+            <small>คุยครบ 5 ครั้ง = หัวใจเต็มดวง</small>
+          </div>
+        </aside>
+
+        <section class="senpai-main">
+          <div class="senpai-chat-history" id="senpaiChatHistory">
+            <div class="s-bubble bot"><div class="s-content">*บิดตัวเขิน* ด...ดาร์ลิ่งเซนไป่มาแล้ว 🥺👉👈 คุยกับหนูหน่อยนะ แล้วหนูจะแบ่ง Token ให้ uwu</div></div>
+          </div>
+          <div class="quick-cringe-bar">
+            <button type="button" class="qc-btn" onclick="sendQuickCringe('ขอ Token หน่อย')">🥺 ขอ Token หน่อย</button>
+            <button type="button" class="qc-btn" onclick="sendQuickCringe('วันนี้เหนื่อยจัง')">😮‍💨 วันนี้เหนื่อยจัง</button>
+            <button type="button" class="qc-btn" onclick="sendQuickCringe('เธอชอบฉันหรือเปล่า')">💘 ชอบฉันไหม</button>
+          </div>
+          <form class="senpai-input-bar" onsubmit="handleSenpaiSubmit(event)">
+            <input type="text" id="senpaiInput" placeholder="พิมพ์หา Clown-chan..." autocomplete="off">
+            <button type="submit">ส่ง 💌</button>
+          </form>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= API KEY MODAL ================= -->
+  <div class="modal-backdrop hidden" id="apiKeyModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3>🔑 ตั้งค่า Gemini API Key</h3>
+          <p>คีย์จะเก็บไว้ใน localStorage ของเบราว์เซอร์คุณเท่านั้น</p>
+        </div>
+        <button class="modal-close-btn" onclick="closeApiKeyModal()">✕</button>
+      </div>
+      <div class="modal-body api-body">
+        <label class="api-label" for="apiKeyInput">API Key</label>
+        <input type="password" id="apiKeyInput" class="api-input" placeholder="วางคีย์ที่นี่" autocomplete="off">
+        <p class="api-help">สร้างคีย์ได้ที่ <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a> ถ้าไม่ใส่คีย์ ระบบจะใช้คำตอบจำลอง (Mock Mode)</p>
+        <div class="api-actions">
+          <button class="btn-secondary" onclick="clearApiKey()">ล้างคีย์</button>
+          <button class="btn-primary" onclick="saveApiKey()">บันทึก</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast hidden" id="toast"><span id="toastIcon">💬</span><span id="toastMsg"></span></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

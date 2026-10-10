@@ -66,7 +66,7 @@
 ## 🙏 เครดิต
 
 - ฟอนต์: Prompt, Instrument Serif, Mali (Google Fonts)
-- ไฟล์เสียงเป็นของเจ้าของเดิม ใช้เพื่อความบันเทิงในงาน Hackathon เท่านั้น
+- ไฟล์เสียงมาจาก Myinstants Senpai Soundboard และ Soundbuttonspro Senpai Soundboard 
 
 ---
 *Made with 🤡 and zero tokens remaining.*
